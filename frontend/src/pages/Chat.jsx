@@ -289,10 +289,11 @@ export default function Chat() {
           />
           <button
             type="submit"
-            className="btn btn-primary"
+            className="chat-send"
             disabled={sending || !input.trim()}
+            aria-label={t("common.send")}
           >
-            {sending ? "…" : t("common.send")}
+            {sending ? "…" : "↑"}
           </button>
         </form>
       </section>

@@ -25,11 +25,14 @@ docker image prune -f >/dev/null 2>&1 || true
 echo "==> Status"
 $COMPOSE ps
 
-echo "==> Health check"
-sleep 5
-if curl -fsS "http://localhost:${PUBLIC_PORT:-6969}/api/health/" >/dev/null; then
-  echo "✅ GovBot is healthy on port ${PUBLIC_PORT:-6969}"
-else
-  echo "⚠️  Health check failed — see: $COMPOSE logs --tail=50"
-  exit 1
-fi
+echo "==> Health check (waiting for backend startup: migrate/seed/collectstatic)"
+PORT="${PUBLIC_PORT:-6969}"
+for i in $(seq 1 30); do
+  if curl -fsS "http://localhost:${PORT}/api/health/" >/dev/null 2>&1; then
+    echo "✅ GovBot is healthy on port ${PORT} (after ~$((i*3))s)"
+    exit 0
+  fi
+  sleep 3
+done
+echo "⚠️  Health check failed after ~90s — see: $COMPOSE logs --tail=50"
+exit 1

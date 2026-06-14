@@ -17,9 +17,22 @@ export default function Chat() {
   const [sending, setSending] = useState(false);
   const [loadingConv, setLoadingConv] = useState(false);
   const [streamingText, setStreamingText] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const scrollRef = useRef(null);
+  const inputRef = useRef(null);
   const prefillConsumed = useRef(false);
+
+  const autoGrowInput = useCallback(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+  }, []);
+
+  const resetInputHeight = useCallback(() => {
+    if (inputRef.current) inputRef.current.style.height = "auto";
+  }, []);
 
   const scrollToBottom = useCallback(() => {
     requestAnimationFrame(() => {
@@ -66,6 +79,13 @@ export default function Chat() {
     setActiveId(null);
     setMessages([]);
     setInput("");
+    resetInputHeight();
+    setSidebarOpen(false);
+  }, [resetInputHeight]);
+
+  const openConversation = useCallback((id) => {
+    setActiveId(id);
+    setSidebarOpen(false);
   }, []);
 
   const ensureConversation = useCallback(async () => {
@@ -82,6 +102,7 @@ export default function Chat() {
       if (!content || sending) return;
       setSending(true);
       setInput("");
+      resetInputHeight();
 
       // Optimistically show the user's message.
       const optimistic = {
@@ -130,7 +151,7 @@ export default function Chat() {
         scrollToBottom();
       }
     },
-    [sending, ensureConversation, i18n.language, refreshConversations, scrollToBottom, t]
+    [sending, ensureConversation, i18n.language, refreshConversations, scrollToBottom, resetInputHeight, t]
   );
 
   // Pre-fill from "Ask the AI about this" (scenario detail) — runs once.
@@ -140,8 +161,10 @@ export default function Chat() {
     if (prefill) {
       prefillConsumed.current = true;
       setInput(prefill);
+      requestAnimationFrame(autoGrowInput);
+      inputRef.current?.focus();
     }
-  }, [location.state]);
+  }, [location.state, autoGrowInput]);
 
   const deleteConversation = useCallback(
     async (id, e) => {
@@ -170,7 +193,10 @@ export default function Chat() {
 
   return (
     <div className="chat-layout">
-      <aside className="chat-sidebar">
+      {sidebarOpen && (
+        <div className="chat-sidebar-backdrop" onClick={() => setSidebarOpen(false)} />
+      )}
+      <aside className={sidebarOpen ? "chat-sidebar open" : "chat-sidebar"}>
         <button type="button" className="btn btn-primary btn-block" onClick={startNewChat}>
           + {t("chat.newChat")}
         </button>
@@ -183,7 +209,7 @@ export default function Chat() {
             <li
               key={c.id}
               className={c.id === activeId ? "conv-item active" : "conv-item"}
-              onClick={() => setActiveId(c.id)}
+              onClick={() => openConversation(c.id)}
             >
               <span className="conv-title">{c.title || t("chat.newChat")}</span>
               <button
@@ -200,6 +226,17 @@ export default function Chat() {
       </aside>
 
       <section className="chat-main">
+        <div className="chat-mobilebar">
+          <button
+            type="button"
+            className="chat-sidebar-toggle"
+            aria-label={t("chat.conversations")}
+            onClick={() => setSidebarOpen(true)}
+          >
+            ☰
+          </button>
+          <span className="chat-mobilebar-title">{t("chat.conversations")}</span>
+        </div>
         <div className="chat-messages" ref={scrollRef}>
           {loadingConv ? (
             <Spinner />
@@ -238,11 +275,15 @@ export default function Chat() {
             {i18n.language.toUpperCase()}
           </span>
           <textarea
+            ref={inputRef}
             className="chat-input"
             rows={1}
             placeholder={t("chat.placeholder")}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+              autoGrowInput();
+            }}
             onKeyDown={onKeyDown}
             aria-label={t("chat.placeholder")}
           />

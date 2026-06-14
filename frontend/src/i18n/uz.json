@@ -100,7 +100,7 @@
     "newChat": "Yangi suhbat",
     "conversations": "Suhbatlar",
     "noConversations": "Hozircha suhbatlar yo'q",
-    "placeholder": "Davlat xizmati haqida so'rang…",
+    "placeholder": "Savol bering…",
     "thinking": "GovBot yozmoqda…",
     "emptyTitle": "Bugun sizga qanday yordam bera olaman?",
     "emptySubtitle": "O'zbekistondagi davlat xizmatlari haqida istalgan savolni bering.",
@@ -118,6 +118,7 @@
     "allCategories": "Barchasi",
     "noResults": "Stsenariylar topilmadi.",
     "askAI": "Bu haqida AI dan so'rash",
+    "askPrefill": "Bu haqida batafsil ayting: {{title}}",
     "updated": "Yangilangan",
     "backToCatalog": "Katalogga qaytish",
     "itemsCount": "{{count}} ta mavzu"

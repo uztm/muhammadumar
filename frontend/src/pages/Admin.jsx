@@ -133,9 +133,11 @@ function CategoriesPanel() {
           <div className="admin-item" key={c.id}>
             <div className="admin-item-main">
               <span className="admin-item-icon">{c.icon || "📁"}</span>
-              <div>
+              <div className="admin-item-text">
                 <div className="admin-item-title">{c.name?.[i18n.language] || c.name?.en || c.slug}</div>
-                <div className="admin-item-sub">{c.slug} · {c.scenario_count} {t("admin.scenarios").toLowerCase()}</div>
+                <div className="admin-item-sub">
+                  <span className="admin-item-meta">{c.slug} · {c.scenario_count} {t("admin.scenarios").toLowerCase()}</span>
+                </div>
               </div>
             </div>
             <div className="admin-item-actions">
@@ -175,7 +177,9 @@ function CategoryForm({ initial, onClose, onSaved }) {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const payload = { slug, icon, order: Number(order), name, description };
+    // Order auto-increments on the server when creating; only sent when editing.
+    const payload = { slug, icon, name, description };
+    if (initial) payload.order = Number(order);
     try {
       if (initial) await adminApi.updateCategory(initial.id, payload);
       else await adminApi.createCategory(payload);
@@ -210,10 +214,12 @@ function CategoryForm({ initial, onClose, onSaved }) {
             <span>{t("admin.icon")}</span>
             <input value={icon} onChange={(e) => setIcon(e.target.value)} placeholder="🛂" />
           </label>
-          <label className="field field-sm">
-            <span>{t("admin.order")}</span>
-            <input type="number" value={order} onChange={(e) => setOrder(e.target.value)} />
-          </label>
+          {initial && (
+            <label className="field field-sm">
+              <span>{t("admin.order")}</span>
+              <input type="number" value={order} onChange={(e) => setOrder(e.target.value)} />
+            </label>
+          )}
         </div>
         <MultiLangField label={t("admin.name")} value={name} onChange={setName} />
         <MultiLangField label={t("admin.description")} value={description} onChange={setDescription} textarea rows={3} />
@@ -263,10 +269,10 @@ function ScenariosPanel() {
           <div className="admin-item" key={s.id}>
             <div className="admin-item-main">
               <span className="admin-item-icon">📄</span>
-              <div>
+              <div className="admin-item-text">
                 <div className="admin-item-title">{s.title?.[i18n.language] || s.title?.en || s.slug}</div>
                 <div className="admin-item-sub">
-                  {s.category_slug} · {s.slug}
+                  <span className="admin-item-meta">{s.category_slug} · {s.slug}</span>
                   {!s.is_published && <span className="pill pill-draft">{t("admin.draft")}</span>}
                 </div>
               </div>
@@ -314,12 +320,13 @@ function ScenarioForm({ initial, categories, onClose, onSaved }) {
     const payload = {
       category: Number(category),
       slug,
-      order: Number(order),
       is_published: isPublished,
       tags: tags.split(",").map((x) => x.trim()).filter(Boolean),
       title,
       body,
     };
+    // Order auto-increments within the category on create; only sent when editing.
+    if (initial) payload.order = Number(order);
     try {
       if (initial) await adminApi.updateScenario(initial.id, payload);
       else await adminApi.createScenario(payload);
@@ -361,10 +368,12 @@ function ScenarioForm({ initial, categories, onClose, onSaved }) {
             <span>{t("admin.slug")}</span>
             <input value={slug} onChange={(e) => setSlug(e.target.value)} required placeholder="passport-renewal" />
           </label>
-          <label className="field field-sm">
-            <span>{t("admin.order")}</span>
-            <input type="number" value={order} onChange={(e) => setOrder(e.target.value)} />
-          </label>
+          {initial && (
+            <label className="field field-sm">
+              <span>{t("admin.order")}</span>
+              <input type="number" value={order} onChange={(e) => setOrder(e.target.value)} />
+            </label>
+          )}
         </div>
 
         <div className="form-row">

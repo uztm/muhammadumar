@@ -32,7 +32,7 @@ export default function ScenarioDetail() {
   }, [slug, i18n.language]);
 
   const askAI = () => {
-    const prefill = `${scenario.title} — ${t("scenarios.askAI")}`;
+    const prefill = t("scenarios.askPrefill", { title: scenario.title });
     const target = user ? "/chat" : "/login";
     navigate(target, {
       state: user ? { prefill } : { from: { pathname: "/chat" }, prefill },

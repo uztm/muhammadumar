@@ -80,11 +80,19 @@ class ScenarioDetailSerializer(LangContextMixin, serializers.ModelSerializer):
 class AdminCategorySerializer(serializers.ModelSerializer):
     name = TranslationsField()
     description = TranslationsField(required=False)
+    order = serializers.IntegerField(required=False)
     scenario_count = serializers.IntegerField(source="scenarios.count", read_only=True)
 
     class Meta:
         model = Category
         fields = ["id", "slug", "icon", "name", "description", "order", "scenario_count"]
+
+    def create(self, validated_data):
+        # Auto-assign the next order when not provided (avoids manual-entry errors).
+        if not validated_data.get("order"):
+            last = Category.objects.order_by("-order").values_list("order", flat=True).first()
+            validated_data["order"] = (last or 0) + 1
+        return super().create(validated_data)
 
 
 class AdminScenarioSerializer(serializers.ModelSerializer):
@@ -93,6 +101,7 @@ class AdminScenarioSerializer(serializers.ModelSerializer):
     tags = serializers.ListField(
         child=serializers.CharField(), required=False, default=list
     )
+    order = serializers.IntegerField(required=False)
     category_slug = serializers.CharField(source="category.slug", read_only=True)
 
     class Meta:
@@ -109,3 +118,15 @@ class AdminScenarioSerializer(serializers.ModelSerializer):
             "is_published",
             "updated_at",
         ]
+
+    def create(self, validated_data):
+        # Auto-assign the next order within the chosen category when not provided.
+        if not validated_data.get("order"):
+            last = (
+                Scenario.objects.filter(category=validated_data["category"])
+                .order_by("-order")
+                .values_list("order", flat=True)
+                .first()
+            )
+            validated_data["order"] = (last or 0) + 1
+        return super().create(validated_data)

@@ -100,7 +100,7 @@
     "newChat": "Новый чат",
     "conversations": "Диалоги",
     "noConversations": "Пока нет диалогов",
-    "placeholder": "Спросите о госуслуге…",
+    "placeholder": "Спросите…",
     "thinking": "GovBot печатает…",
     "emptyTitle": "Чем могу помочь сегодня?",
     "emptySubtitle": "Спросите что угодно о госуслугах в Узбекистане.",
@@ -118,6 +118,7 @@
     "allCategories": "Все",
     "noResults": "Сценарии не найдены.",
     "askAI": "Спросить об этом у ИИ",
+    "askPrefill": "Расскажи подробнее про: {{title}}",
     "updated": "Обновлено",
     "backToCatalog": "Назад к каталогу",
     "itemsCount": "{{count}} тем"

@@ -100,7 +100,7 @@
     "newChat": "New chat",
     "conversations": "Conversations",
     "noConversations": "No conversations yet",
-    "placeholder": "Ask about a government service…",
+    "placeholder": "Ask anything…",
     "thinking": "GovBot is typing…",
     "emptyTitle": "How can I help you today?",
     "emptySubtitle": "Ask me anything about public services in Uzbekistan.",
@@ -118,6 +118,7 @@
     "allCategories": "All",
     "noResults": "No scenarios found.",
     "askAI": "Ask the AI about this",
+    "askPrefill": "Tell me more about: {{title}}",
     "updated": "Updated",
     "backToCatalog": "Back to catalog",
     "itemsCount": "{{count}} topics"

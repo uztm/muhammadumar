@@ -151,6 +151,12 @@ CORS_ALLOWED_ORIGINS = list(
 )
 CORS_ALLOW_CREDENTIALS = True
 
+# Trusted origins for unsafe (POST) requests to Django admin behind a proxy.
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[FRONTEND_ORIGIN])
+
+# Respect the X-Forwarded-Proto header set by the nginx reverse proxy.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 # ---------------------------------------------------------------------------
 # OpenAI
 # ---------------------------------------------------------------------------

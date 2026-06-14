@@ -119,6 +119,36 @@ Add `?lang=uz|ru|en` to scenario endpoints to localize content.
 
 ---
 
+## Production deployment
+
+The app ships a **single-origin** production stack: one public port (default **6969**)
+serves the React build via nginx, which reverse-proxies `/api` and `/admin` to the internal
+Django container (so SSE streaming and the admin both work behind the proxy).
+
+```bash
+# on the server
+git clone https://github.com/uztm/muhammadumar.git /opt/govbot && cd /opt/govbot
+cp .env.prod.example .env        # fill SECRET_KEY, POSTGRES_PASSWORD, OPENAI_API_KEY, IP/host
+./deploy.sh                      # build + start, then health-check
+```
+
+App → `http://<server-ip>:6969` · Admin → `http://<server-ip>:6969/admin`
+
+### CI/CD
+
+- **CI** — `.github/workflows/deploy.yml` runs the backend test suite on every push/PR.
+- **CD (server-side, zero-config)** — a `systemd` timer (`deploy/govbot-deploy.timer`)
+  polls `origin/main` every ~2 min and runs `auto-deploy.sh`, which redeploys only when the
+  commit changed. Install once:
+
+  ```bash
+  cp /opt/govbot/deploy/govbot-deploy.* /etc/systemd/system/
+  systemctl daemon-reload && systemctl enable --now govbot-deploy.timer
+  ```
+
+- **CD (instant, optional)** — add repo secrets `SERVER_HOST`, `SERVER_USER`,
+  `SERVER_PASSWORD` and the workflow also deploys over SSH immediately on push to `main`.
+
 ## Tests
 
 ```bash

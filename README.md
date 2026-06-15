@@ -134,6 +134,25 @@ cp .env.prod.example .env        # fill SECRET_KEY, POSTGRES_PASSWORD, OPENAI_AP
 
 App → `http://<server-ip>:6969` · Admin → `http://<server-ip>:6969/admin`
 
+### Domain + HTTPS
+
+The frontend is built single-origin (`VITE_API_BASE_URL=/api`), so it works behind any
+domain with no rebuild. To serve it over HTTPS, point a reverse proxy with automatic TLS at
+the published port. With **Caddy** (auto Let's Encrypt) it's one site block:
+
+```caddy
+govbot.example.com {
+    encode zstd gzip
+    reverse_proxy <host-or-gateway>:6969 {
+        flush_interval -1     # keep SSE streaming working
+    }
+}
+```
+
+Then add the domain to the backend `.env`: `ALLOWED_HOSTS`, `FRONTEND_ORIGIN=https://...`,
+and `CSRF_TRUSTED_ORIGINS=https://...` (so the Django admin works), and recreate the
+backend. Live example: **https://govbot.pdpjunior.uz**.
+
 ### CI/CD
 
 - **CI** — `.github/workflows/deploy.yml` runs the backend test suite on every push/PR.
